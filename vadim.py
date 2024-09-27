@@ -1,6 +1,6 @@
 from ucimlrepo import fetch_ucirepo
 import numpy as np
-import pandas as pd
+import matplotlib.pyplot as plt
 import random
 
 # загрузка набора данных
@@ -59,5 +59,22 @@ while not prev_points or not np.array_equal(prev_points, mean_points):
         mean_points[j] *= (1. / len(clusters[j]))
 
 # Вывод кластеров
-print(clusters)
-print(y)
+# Запись в файл y
+with open('y.txt', 'w') as f:
+        f.write(str(y))  # Печатает каждое значение с новой строки
+
+# Запись в файл clusters
+with open('clusters.txt', 'w') as f:
+    for cluster in clusters:
+        f.write(f"{cluster}\n")  # Печатает каждый кластер в виде списка
+
+
+clusters_vis = np.zeros(len(numX), dtype=int)
+for cluster_id, cluster in enumerate(clusters):
+    for i in cluster:
+        clusters_vis[i] = cluster_id
+
+mean_points_np = np.array(mean_points)  # Преобразуем список в numpy-массив
+plt.scatter(numX[:, 0], numX[:, 12], c=clusters_vis, cmap='viridis') # оси -- первые два столбца
+plt.scatter(mean_points_np[:, 0], mean_points_np[:, 12], c='black', s=200, alpha=0.5)
+plt.show()
