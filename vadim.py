@@ -14,6 +14,17 @@ numX = wine.data.features.to_numpy()
 
 num_clusters = 3
 
+
+def normalization(data):
+    data_new = [nums.copy() for nums in data]
+    for j in range(len(data[0])):
+        min_val = np.min(data[:, j])
+        max_val = np.max(data[:, j])
+        for i in range(len(data)):
+            data_new[i][j] = (data[i][j] - min_val)(max_val - min_val)
+
+    return data_new
+
 # Инициализация начальных точек
 mean_points = [np.zeros(len(numX[0])) for _ in range(num_clusters)]
 
