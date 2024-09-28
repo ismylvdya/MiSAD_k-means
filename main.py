@@ -1,6 +1,20 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+def normalized(data):
+    '''Функция для нормализации данных
+
+    принимает на вход двумерный numpy массив
+    возвращает нормализованный массив'''
+
+    data_new = np.copy(data)
+    for j in range(len(data[0])): # перебираем все строки датасета
+        min_val = np.min(data[:, j])
+        max_val = np.max(data[:, j])
+        for i in range(len(data)):
+            data_new[i][j] = (data[i][j] - min_val) / (max_val - min_val)
+    return data_new
+
 def distance(x1, x2):
     '''Функция для вычисления расстояния между двумя точками'''
     return np.sqrt(np.sum((x1 - x2)**2))
@@ -32,8 +46,8 @@ def update_centers(X, clusters, k):
 
 def plot_clusters(X, clusters, centers):
     '''Функция для визуализации данных'''
-    plt.scatter(X[:, 0], X[:, 1], c=clusters, cmap='viridis') # оси -- первые два столбца
-    plt.scatter(centers[:, 0], centers[:, 1], c='black', s=200, alpha=0.5)
+    plt.scatter(X[:, 0], X[:, 12], c=clusters, cmap='viridis') # оси -- первые два столбца
+    plt.scatter(centers[:, 0], centers[:, 12], c='black', s=200, alpha=0.5)
     plt.show()
 
 def kmeans(X, k, num_iterations):
@@ -51,8 +65,8 @@ from datasets import wine as cur_dataset
 # from datasets import car as cur_dataset
 # from datasets import bank_marketing as cur_dataset
 
-X = cur_dataset.features() # датасет
-y = cur_dataset.targets()  # эталонное распределение по кластерам
+X = normalized(cur_dataset.features()) # датасет
+y = normalized(cur_dataset.targets())  # эталонное распределение по кластерам
 
 (centers, clusters) = kmeans(X,3, 25)
 
