@@ -148,18 +148,29 @@ from datasets.wine import WineDataset as CurDataset
 # from datasets import car as cur_dataset
 # from datasets import bank_marketing as cur_dataset
 
-Xobject = CurDataset() # класс -- чтобы передавать объект класса в визуализирующую функцию и иметь доступ к именам осей
+Xobject = CurDataset() # класс -- чтобы передавать объект класса в визуализирующую функцию и иметь поэтому доступ к именам осей
+
+for x in range(13):
+    for y in range(13):
+        if y > x:
+            plt.scatter(Xobject.get_normalized_features()[:, x], Xobject.get_normalized_features()[:, y])
+            # Полный путь для сохранения
+            full_path = os.path.join('./images', f'{x}-{y}.jpg')
+            # Сохранение изображения в формате JPG
+            plt.savefig(full_path, format='jpg')
+            plt.show()
+
 
 #прогонка kmeans
-(centers, clusters, iter_count) = kmeans(Xobject)
-print(f'\nkmeans() отработал за {iter_count} итераций')
+# (centers, clusters, iter_count) = kmeans(Xobject)
+# print(f'\nkmeans() отработал за {iter_count} итераций')
 
 # Оценка точности кластеризации
-targets = Xobject.get_targets()
-(matches_count, diff_indexes) = matches_counts_in(clusters, targets, Xobject.k)
-
-print_with_diff(clusters, targets, diff_indexes)
-
-accuracy = matches_count / len(targets)
-
-print(f'Accuracy:  {matches_count} / {len(targets)}  =  {accuracy:5.3f}')
+# targets = Xobject.get_targets()
+# (matches_count, diff_indexes) = matches_counts_in(clusters, targets, Xobject.k)
+#
+# print_with_diff(clusters, targets, diff_indexes)
+#
+# accuracy = matches_count / len(targets)
+#
+# print(f'Accuracy:  {matches_count} / {len(targets)}  =  {accuracy:5.3f}')
