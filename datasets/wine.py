@@ -20,10 +20,16 @@ def normalized(data):
 
 class WineDataset:
     def __init__(self, dataset_id=109):
-        # Загружаем набор данных при инициализации класса
-        self.wine_dataset = fetch_ucirepo(id=dataset_id)
+        self.dataset = fetch_ucirepo(id=dataset_id)
 
-        self.k = 3  # Количество кластеров
+        self.features = self.dataset.data.features.to_numpy()
+        self.normalized_features = normalized(self.dataset.data.features.to_numpy())
+
+        self.targets = []
+        for el in self.dataset.data.targets.to_numpy():
+            self.targets.append(*el)
+
+        self.k = 3  # Количество кластеров (задаем из условия поставленной задачи)
 
         # Устанавливаем названия признаков
         self.axis_names = {
@@ -46,26 +52,6 @@ class WineDataset:
         self.best_axis2 = 12
 
 
-    def get_features(self):
-        '''Возвращает весь датасет как numpy массив'''
-        return self.wine_dataset.data.features.to_numpy()
-
-    def get_normalized_features(self):
-        '''Возвращает весь датасет НОРМАЛИЗОВАННЫЙ ДО [0,1] как numpy массив'''
-        return normalized(self.wine_dataset.data.features.to_numpy())
-
-    def get_targets(self):
-        '''Возвращает эталонную кластеризацию как нормальный numpy массив'''
-        targets = []
-        for el in self.wine_dataset.data.targets.to_numpy():
-            targets.append(*el)
-        return targets
-
-    def get_axis_name(self, n):
-        '''Возвращает название признака по его номеру'''
-        return self.axis_names[n] if n in [0,12] else None
-
-
     def plot_all_target_axis(self):
         '''экспортирует в ./images/targets_axis_wine графики во всевозможных осях, раскрашенные по targer'''
         custom_cmap = LinearSegmentedColormap.from_list('custom_cmap', ['orangered', 'royalblue', 'gold'])
@@ -75,10 +61,10 @@ class WineDataset:
         # Создание папки
         os.makedirs(dir_path, exist_ok=True)
 
-        for x in range(13):
-            for y in range(13):
+        for x in range(self.features.shape[1]): # obj.features.shape[1] для wine равно 13
+            for y in range(self.features.shape[1]):
                 if y > x:
-                    plt.scatter(self.get_normalized_features()[:, x], self.get_normalized_features()[:, y], c=self.get_targets(),
+                    plt.scatter(self.normalized_features[:, x], self.normalized_features[:, y], c=self.targets,
                                 cmap=custom_cmap)  # X[:, первая ось], X[:, вторая ось]
                     # Сохранение изображения в формате JPG
                     plt.savefig(dir_path + f'/{x}-{y}.jpg', format='jpg')
@@ -88,8 +74,8 @@ class WineDataset:
 
     def print_metadata(self):
         '''Печатает метаданные набора данных'''
-        print(self.wine_dataset.metadata)
+        print(self.dataset.metadata)
 
     def print_variable_info(self):
         '''Печатает информацию о переменных набора данных'''
-        print(self.wine_dataset.variables)
+        print(self.dataset.variables)

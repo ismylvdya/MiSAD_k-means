@@ -38,16 +38,15 @@ def update_centers(X, clusters, k):
 # Создание пользовательской цветовой карты триколора
 custom_cmap = LinearSegmentedColormap.from_list('custom_cmap', ['orangered', 'royalblue', 'gold'])
 
-def plot_export_and_show(X, clusters, centers, cur_iter, first_axis=0, second_axis=1, save_path=None):
+def plot_export_and_show(X, clusters, centers, cur_iter, save_path=None):
     '''Функция для визуализации данных'''
-    X_normalized_features = X.get_normalized_features()
 
-    plt.scatter(X_normalized_features[:, first_axis], X_normalized_features[:, second_axis], c=clusters, cmap=custom_cmap) # X[:, первая ось], X[:, вторая ось]
-    plt.scatter(centers[:, first_axis], centers[:, second_axis], c='black', s=400, alpha=0.9)
+    plt.scatter(X.normalized_features[:, X.best_axis1], X.normalized_features[:, X.best_axis2], c=clusters, cmap=custom_cmap) # X[:, первая ось], X[:, вторая ось]
+    plt.scatter(centers[:, X.best_axis1], centers[:, X.best_axis2], c='black', s=400, alpha=0.9)
 
     # Подпись осей
-    plt.xlabel(str(first_axis) + ': ' + str(X.get_axis_name(first_axis)) + ' (normalized)')
-    plt.ylabel(str(second_axis) + ': ' + str(X.get_axis_name(second_axis)) + ' (normalized)')
+    plt.xlabel(str(X.best_axis1) + ': ' + str(X.axis_names[X.best_axis1]) + ' (normalized)')
+    plt.ylabel(str(X.best_axis2) + ': ' + str(X.axis_names[X.best_axis2]) + ' (normalized)')
 
     # Сохранение изображения, если указан путь
     if save_path:
@@ -80,8 +79,7 @@ def kmeans(X):
     '''Функция для запуска алгоритма K-means
     возврщает получившиеся на полседней итерации центроиды, распределение точек по кластерам и полученное количество итераций'''
 
-    X_normalized_features = X.get_normalized_features()
-    cur_centers = initialize_centers(X_normalized_features, X.k)
+    cur_centers = initialize_centers(X.normalized_features, X.k)
     prev_centers = []
     clusters = []
     export_dir = create_folder_in('./images') # куда экспортировать графики с каждой итерации
@@ -89,9 +87,9 @@ def kmeans(X):
     i = 0
     while not np.array_equal(prev_centers, cur_centers):
         prev_centers = np.copy(cur_centers)  # сохраняем предыдущие центры для последующего сравнения
-        clusters = assign_clusters(X_normalized_features, cur_centers)
-        cur_centers = update_centers(X_normalized_features, clusters, X.k)
-        plot_export_and_show(X, clusters, cur_centers, i, X.best_axis1, X.best_axis2, export_dir)
+        clusters = assign_clusters(X.normalized_features, cur_centers)
+        cur_centers = update_centers(X.normalized_features, clusters, X.k)
+        plot_export_and_show(X, clusters, cur_centers, i, export_dir)
         i += 1
 
     return (cur_centers, clusters, i)
@@ -159,7 +157,7 @@ Xobject = CurDataset() # класс -- чтобы передавать объе�
 print(f'\nkmeans() отработал за {iter_count} итераций')
 
 # Оценка точности кластеризации
-targets = Xobject.get_targets()
+targets = Xobject.targets
 (matches_count, diff_indexes) = matches_counts_in(clusters, targets, Xobject.k)
 
 print_with_diff(clusters, targets, diff_indexes)
