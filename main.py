@@ -41,7 +41,7 @@ def update_centers(X, clusters, k):
 # Создание пользовательской цветовой карты триколора
 custom_cmap = LinearSegmentedColormap.from_list('custom_cmap', ['orangered', 'royalblue', 'gold'])
 
-def plot_export_and_show(X, clusters, centers, cur_iter, save_path=None):
+def plot_export_and_show(X, clusters, centers, cur_iter, save_path=None, is_iter_last=False):
     '''Функция для экспорта графика clusters и centers на данной cur_iter-ации в save_path-директорию и его визуализации внутри пайчарма'''
 
     # вычисление порядковых номеров точек (нужно только diff_indexes) на которых кластеризация прошла неверно
@@ -51,8 +51,9 @@ def plot_export_and_show(X, clusters, centers, cur_iter, save_path=None):
     plt.scatter(X.normalized_features[:, X.best_axis1], X.normalized_features[:, X.best_axis2], c=clusters, cmap=custom_cmap) # X[:, первая ось], X[:, вторая ось]
 
     # Визуализация черных точек, которые кластеризовались неверно относително targets
-    for i in diff_indexes:
-        plt.scatter(X.normalized_features[i, X.best_axis1], X.normalized_features[i, X.best_axis2], color='black') # X[:, первая ось], X[:, вторая ось]
+    if is_iter_last == True: # только если это последняя итерация k-means
+        for i in diff_indexes:
+            plt.scatter(X.normalized_features[i, X.best_axis1], X.normalized_features[i, X.best_axis2], color='black') # X[:, первая ось], X[:, вторая ось]
 
     # визализация центроидов
     plt.scatter(centers[:, X.best_axis1], centers[:, X.best_axis2], c='black', s=400, alpha=0.7)
@@ -102,7 +103,10 @@ def kmeans(X):
         prev_centers = np.copy(cur_centers)  # сохраняем предыдущие центры для последующего сравнения
         clusters = assign_clusters(X.normalized_features, cur_centers)
         cur_centers = update_centers(X.normalized_features, clusters, X.k)
-        plot_export_and_show(X, clusters, cur_centers, i, export_dir)
+        if not np.array_equal(prev_centers, cur_centers):
+            plot_export_and_show(X, clusters, cur_centers, i, export_dir, is_iter_last=False)
+        else:
+            plot_export_and_show(X, clusters, cur_centers, i, export_dir, is_iter_last=True)
         i += 1
 
     return (cur_centers, clusters, i)
