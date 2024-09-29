@@ -1,5 +1,9 @@
 from ucimlrepo import fetch_ucirepo
 import numpy as np
+# для импортирования всевозсожных осей:
+import os
+import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap # для своего триколора
 
 def normalized(data):
     '''Функция для нормализации данных
@@ -46,16 +50,36 @@ class WineDataset:
         '''Возвращает весь датасет НОРМАЛИЗОВАННЫЙ ДО [0,1] как numpy массив'''
         return normalized(self.wine_dataset.data.features.to_numpy())
 
-    def get_axis_name(self, n):
-        '''Возвращает название признака по его номеру'''
-        return self.axis_names[n] if n in [0,12] else None
-
     def get_targets(self):
         '''Возвращает эталонную кластеризацию как нормальный numpy массив'''
         targets = []
         for el in self.wine_dataset.data.targets.to_numpy():
             targets.append(*el)
         return targets
+
+    def get_axis_name(self, n):
+        '''Возвращает название признака по его номеру'''
+        return self.axis_names[n] if n in [0,12] else None
+
+
+    def plot_all_target_axis(self):
+        '''экспортирует в ./images/targets_axis_wine графики во всевозможных осях, раскрашенные по targer'''
+        custom_cmap = LinearSegmentedColormap.from_list('custom_cmap', ['orangered', 'royalblue', 'gold'])
+
+        # Полный путь для новой папки
+        dir_path = './images/targets_axis_wine'
+        # Создание папки
+        os.makedirs(dir_path, exist_ok=True)
+
+        for x in range(13):
+            for y in range(13):
+                if y > x:
+                    plt.scatter(self.get_normalized_features()[:, x], self.get_normalized_features()[:, y], c=self.get_targets(),
+                                cmap=custom_cmap)  # X[:, первая ось], X[:, вторая ось]
+                    # Сохранение изображения в формате JPG
+                    plt.savefig(dir_path + f'/{x}-{y}.jpg', format='jpg')
+                    plt.show()  # здесь -- просто для очистки полотна
+
 
     def print_metadata(self):
         '''Печатает метаданные набора данных'''
