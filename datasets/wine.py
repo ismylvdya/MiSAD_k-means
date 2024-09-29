@@ -42,6 +42,10 @@ class WineDataset:
             12: 'Proline'
         }
 
+        self.best_axis1 = 6
+        self.best_axis2 = 12
+
+
     def get_features(self):
         '''Возвращает весь датасет как numpy массив'''
         return self.wine_dataset.data.features.to_numpy()
@@ -79,6 +83,7 @@ class WineDataset:
                     # Сохранение изображения в формате JPG
                     plt.savefig(dir_path + f'/{x}-{y}.jpg', format='jpg')
                     plt.show()  # здесь -- просто для очистки полотна
+
 
 
     def print_metadata(self):
