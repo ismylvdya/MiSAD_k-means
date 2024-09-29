@@ -44,14 +44,17 @@ custom_cmap = LinearSegmentedColormap.from_list('custom_cmap', ['orangered', 'ro
 def plot_export_and_show(X, clusters, centers, cur_iter, save_path=None):
     '''Функция для экспорта графика clusters и centers на данной cur_iter-ации в save_path-директорию и его визуализации внутри пайчарма'''
 
-    # вычисление порядковых номеров точек на которых кластеризация прошла неверно
+    # вычисление порядковых номеров точек (нужно только diff_indexes) на которых кластеризация прошла неверно
     (matches_count, diff_indexes) = matches_counts_in(clusters, X.targets, Xobject.k)
 
+    # визуализация ВСЕХ кластеризированных точек
     plt.scatter(X.normalized_features[:, X.best_axis1], X.normalized_features[:, X.best_axis2], c=clusters, cmap=custom_cmap) # X[:, первая ось], X[:, вторая ось]
 
+    # Визуализация черных точек, которые кластеризовались неверно относително targets
     for i in diff_indexes:
         plt.scatter(X.normalized_features[i, X.best_axis1], X.normalized_features[i, X.best_axis2], color='black') # X[:, первая ось], X[:, вторая ось]
 
+    # визализация центроидов
     plt.scatter(centers[:, X.best_axis1], centers[:, X.best_axis2], c='black', s=400, alpha=0.7)
 
     # Подпись осей
