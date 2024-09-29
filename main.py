@@ -1,24 +1,27 @@
 import numpy as np
-import os # для экпорта изображений
-from datetime import datetime # для экпорта изображений
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap # для своего триколора
+# для экпорта изображений
+import os
+from datetime import datetime
 
 
 def distance(x1, x2):
-    '''Функция для вычисления расстояния между двумя точками'''
+    '''возвращает евклидово расстояние'''
     return np.sqrt(np.sum((x1 - x2)**2))
 
 def initialize_centers(X, k):
-    '''Функция для инициализации центров кластеров'''
-    centers = np.zeros((k, X.shape[1])) # двумерный массив (количество центроидов x координаты каждого). X.shape[1] -- количество столбцов в датасете (количество осей)
+    '''Функция для инициализации центров кластеров
+    возвращает двумерный массив: центроид x его координаты'''
+    centers = np.zeros((k, X.shape[1])) # двумерный массив (количество центроидов x координаты каждого). X.shape[1] -- количество столбцов в датасете (количество осей на графике)
     for i in range(k):
         centers[i] = X[np.random.choice(range(X.shape[0]))] # каждый из k кластеров инициализируем координатами случайной точки из датасета
     return centers
 
 def assign_clusters(X, centers):
-    '''Функция для разбиения данных на кластеры'''
-    clusters = [] # массив распределения точек по кластерам. Он длины количества точек и каждый его элементом является порядковый номер кластера, к которому относится i-ая точка
+    '''Функция для распределения точек по кластерам
+    возвращает массив распределения'''
+    clusters = [] # массив распределения точек по кластерам. Он длины количества точек и каждый его элементом является порядковый номер кластера (с 0), к которому относится i-ая точка
     for i in range(X.shape[0]): # для каждой точки из датасета
         distances = [distance(X[i], center) for center in centers] # массив расстояний от данной i-ой точки до каждого центра
         cluster = np.argmin(distances) # выбираем минимальное из расстояний до центроидов. cluster -- порядковый номер кластера (с нуля), к которому теперь относится i-ая точка
@@ -26,7 +29,7 @@ def assign_clusters(X, centers):
     return clusters
 
 def update_centers(X, clusters, k):
-    '''Функция для обновления центров кластеров'''
+    '''Функция для обновления центров кластеров через вычисление центра мас'''
     centers = np.zeros((k, X.shape[1])) #
     for i in range(k): # сначала для первого, потом для второго, затем для третьего кластера
         cluster_points = [X[j] for j in range(len(X)) if clusters[j] == i] # -- оставляем из датасета X только те точки которые принадлежат i-му кластеру
@@ -39,7 +42,7 @@ def update_centers(X, clusters, k):
 custom_cmap = LinearSegmentedColormap.from_list('custom_cmap', ['orangered', 'royalblue', 'gold'])
 
 def plot_export_and_show(X, clusters, centers, cur_iter, save_path=None):
-    '''Функция для визуализации данных'''
+    '''Функция для экспорта графика clusters и centers на данной cur_iter-ации в save_path-директорию и его визуализации внутри пайчарма'''
 
     plt.scatter(X.normalized_features[:, X.best_axis1], X.normalized_features[:, X.best_axis2], c=clusters, cmap=custom_cmap) # X[:, первая ось], X[:, вторая ось]
     plt.scatter(centers[:, X.best_axis1], centers[:, X.best_axis2], c='black', s=400, alpha=0.9)
@@ -60,10 +63,10 @@ def plot_export_and_show(X, clusters, centers, cur_iter, save_path=None):
         # Сохранение изображения в формате JPG
         plt.savefig(full_path, format='jpg')
 
-    plt.show()
+    plt.show() # в т.ч. для очистки полотна
 
 def create_folder_in(base_path='.'):
-    '''создает папку с именем "plots_YYYY-MM-DD_HH-MM-SS" в передаваемой директории'''
+    '''создает папку с именем "plots_DD-MM-YYYY_HH-MM-SS" в передаваемой директории'''
     # Получение текущей даты и времени в формате 'YYYY-MM-DD_HH-MM-SS'
     current_time = datetime.now().strftime('%d-%m-%Y_%H-%M-%S')
     # Полный путь для новой папки
@@ -76,8 +79,8 @@ def create_folder_in(base_path='.'):
 
 
 def kmeans(X):
-    '''Функция для запуска алгоритма K-means
-    возврщает получившиеся на полседней итерации центроиды, распределение точек по кластерам и полученное количество итераций'''
+    '''Функция прогонки алгоритма K-means
+    возврщает получившиеся на полседней итерации центроиды, массив распределения точек по кластерам и полученное количество итераций'''
 
     cur_centers = initialize_centers(X.normalized_features, X.k)
     prev_centers = []
@@ -96,7 +99,7 @@ def kmeans(X):
 
 
 def matches_counts_in(clusters, targets, k):
-    '''возвращает (количество совпадающих точек, индексы несовпадений) между нашей кластеризацией (на k кластеров) и эталонной С УЧЕТОМ РАЗНОЙ НУМЕРАЦИИ КЛАСТЕРОВ'''
+    '''возвращает tuple (количество совпадающих точек, индексы несовпадений) между нашей кластеризацией (на k кластеров) и эталонной С УЧЕТОМ РАЗНОЙ НУМЕРАЦИИ КЛАСТЕРОВ'''
 
     matches_count = 0
     diff_indexes = []
@@ -118,10 +121,6 @@ def matches_counts_in(clusters, targets, k):
             matches_count += 1
         else:
             diff_indexes.append(i)
-
-    # print(posible_pairs)
-    # print(top_k_pairs)
-    # print(matches_count)
 
     return (matches_count, diff_indexes)
 
@@ -147,8 +146,6 @@ def print_with_diff(clusters, targets, diff_indexes):
 
 
 from datasets.wine import WineDataset as CurDataset
-# from datasets import car as cur_dataset
-# from datasets import bank_marketing as cur_dataset
 
 Xobject = CurDataset() # класс -- чтобы передавать объект класса в визуализирующую функцию и иметь поэтому доступ к именам осей
 
