@@ -82,7 +82,7 @@ class CarDataset:
 
 
     def plot_all_target_axis(self):
-        '''экспортирует в ./images/targets_axis_wine графики во всевозможных осях, раскрашенные по targer'''
+        '''экспортирует в ./images/targets_axis_car графики во всевозможных осях, раскрашенные по targer'''
         custom_cmap = LinearSegmentedColormap.from_list('custom_cmap', ['orangered', 'royalblue', 'gold'])
 
         # Полный путь для новой папки
