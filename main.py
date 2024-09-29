@@ -30,7 +30,9 @@ def update_centers(X, clusters, k):
     centers = np.zeros((k, X.shape[1])) #
     for i in range(k): # сначала для первого, потом для второго, затем для третьего кластера
         cluster_points = [X[j] for j in range(len(X)) if clusters[j] == i] # -- оставляем из датасета X только те точки которые принадлежат i-му кластеру
-        centers[i] = np.mean(cluster_points, axis=0) # и для данных точек из i-го кластера считаем среднее
+        if len(cluster_points) > 0:  # Проверяем, есть ли точки в кластере. Если есть то пересчитываем его цетроиду как центр масс
+            centers[i] = np.mean(cluster_points, axis=0) # и для данных точек из i-го кластера считаем среднее. axis=0 -- усредняем каждый столбец а не каждую строку
+
     return centers
 
 # Создание пользовательской цветовой карты триколора
@@ -73,6 +75,7 @@ def create_folder_in(base_path='.'):
     return full_path
 
 
+
 def kmeans(X):
     '''Функция для запуска алгоритма K-means
     возврщает получившиеся на полседней итерации центроиды, распределение точек по кластерам и полученное количество итераций'''
@@ -88,7 +91,7 @@ def kmeans(X):
         prev_centers = np.copy(cur_centers)  # сохраняем предыдущие центры для последующего сравнения
         clusters = assign_clusters(X_normalized_features, cur_centers)
         cur_centers = update_centers(X_normalized_features, clusters, X.k)
-        plot_export_and_show(X, clusters, cur_centers, i, 0, 12, export_dir)
+        plot_export_and_show(X, clusters, cur_centers, i, X.best_axis1, X.best_axis2, export_dir)
         i += 1
 
     return (cur_centers, clusters, i)
@@ -144,33 +147,23 @@ def print_with_diff(clusters, targets, diff_indexes):
     print(']')
 
 
+
 from datasets.wine import WineDataset as CurDataset
 # from datasets import car as cur_dataset
 # from datasets import bank_marketing as cur_dataset
 
 Xobject = CurDataset() # класс -- чтобы передавать объект класса в визуализирующую функцию и иметь поэтому доступ к именам осей
 
-for x in range(13):
-    for y in range(13):
-        if y > x:
-            plt.scatter(Xobject.get_normalized_features()[:, x], Xobject.get_normalized_features()[:, y])
-            # Полный путь для сохранения
-            full_path = os.path.join('./images', f'{x}-{y}.jpg')
-            # Сохранение изображения в формате JPG
-            plt.savefig(full_path, format='jpg')
-            plt.show()
-
-
 #прогонка kmeans
-# (centers, clusters, iter_count) = kmeans(Xobject)
-# print(f'\nkmeans() отработал за {iter_count} итераций')
+(centers, clusters, iter_count) = kmeans(Xobject)
+print(f'\nkmeans() отработал за {iter_count} итераций')
 
 # Оценка точности кластеризации
-# targets = Xobject.get_targets()
-# (matches_count, diff_indexes) = matches_counts_in(clusters, targets, Xobject.k)
-#
-# print_with_diff(clusters, targets, diff_indexes)
-#
-# accuracy = matches_count / len(targets)
-#
-# print(f'Accuracy:  {matches_count} / {len(targets)}  =  {accuracy:5.3f}')
+targets = Xobject.get_targets()
+(matches_count, diff_indexes) = matches_counts_in(clusters, targets, Xobject.k)
+
+print_with_diff(clusters, targets, diff_indexes)
+
+accuracy = matches_count / len(targets)
+
+print(f'Accuracy:  {matches_count} / {len(targets)}  =  {accuracy:5.3f}')
