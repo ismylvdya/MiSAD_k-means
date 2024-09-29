@@ -4,7 +4,6 @@ import random
 from ucimlrepo import fetch_ucirepo
 
 def normalization(data):
-    '''Функция для нормализации данных'''
     data_new = np.copy(data)
     for j in range(len(data[0])):
         min_val = np.min(data[:, j])
@@ -14,7 +13,6 @@ def normalization(data):
     return data_new
 
 def k_means(data, num_clusters):
-    '''Функция для выполнения k-means кластеризации'''
     mean_points = [np.zeros(len(data[0])) for _ in range(num_clusters)]
 
     for point in mean_points:
@@ -53,10 +51,8 @@ def k_means(data, num_clusters):
 
     return [clusters, mean_points]
 
-# Загрузка набора данных
 wine = fetch_ucirepo(id=109)
 
-# Данные в формате pandas dataframes
 X = wine.data.features
 y = wine.data.targets
 
@@ -64,30 +60,25 @@ numX = wine.data.features.to_numpy()
 
 num_clusters = 3
 
-# Нормализация данных
 data_new = normalization(numX)
 clusters_finish = k_means(data_new, num_clusters)
 
 # Запись результатов в файлы
 with open('y.txt', 'w') as f:
-    f.write(str(y))  # Записываем метки классов
+    f.write(str(y))
 
 with open('clusters.txt', 'w') as f:
     for cluster in clusters_finish[0]:
-        f.write(f"{cluster}\n")  # Записываем кластеры
+        f.write(f"{cluster}\n")
 
-# Визуализация конечного результата
 clusters_vis = np.zeros(len(numX), dtype=int)
 for cluster_id, cluster in enumerate(clusters_finish[0]):
     for i in cluster:
         clusters_vis[i] = cluster_id
 
-# Преобразуем средние точки кластеров в numpy-массив
 mean_points_np = np.array(clusters_finish[1])
 
-# Визуализация кластеров и центров кластеров
 plt.scatter(data_new[:, 12], data_new[:, 2], c=clusters_vis, cmap='viridis')
 plt.scatter(mean_points_np[:, 12], mean_points_np[:, 2], c='black', s=200, alpha=0.5)
 
-# Показываем только одно окно с графиком, без повторных открытий
 plt.show()
